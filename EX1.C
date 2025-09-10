@@ -235,38 +235,35 @@ void  Task (void *pdata)
                     PC_DispChar(x, y + 5, ' ', DISP_BGND_RED);
                 }
             }
-            OSTimeDlyHMSM(0, 0, 1, 0);
         }
-       
+        OSTimeDlyHMSM(0, 0, 1, 0);
 
-        else if (*(char *)pdata == '1') {
+        if (*(char *)pdata == '1') {
             for(x = 0; x < 80; x++) {
                 for(y = 5; y < 16; y++) {
                     PC_DispChar(x, y + 5, ' ', DISP_BGND_BLUE);
                 }
             }
-            OSTimeDlyHMSM(0, 0, 1, 0);
         }
-        
+        OSTimeDlyHMSM(0, 0, 1, 0);
 
-        else if (*(char *)pdata == '2') {
+        if (*(char *)pdata == '2') {
             for(x = 0; x < 80; x++) {
                 for(y = 5; y < 16; y++) {
                     PC_DispChar(x, y + 5, ' ', DISP_BGND_BROWN);
                 }
             }
-            OSTimeDlyHMSM(0, 0, 1, 0);
-
         }
+        OSTimeDlyHMSM(0, 0, 1, 0);
 
-        else if (*(char *)pdata == '3') {
+        if (*(char *)pdata == '3') {
             for(x = 0; x < 80; x++) {
                 for(y = 5; y < 16; y++) {
                     PC_DispChar(x, y + 5, ' ', DISP_BGND_GREEN);
                 }
             }
-            OSTimeDlyHMSM(0, 0, 1, 0);
         }
+        OSTimeDlyHMSM(0, 0, 1, 0);
         
 
         // OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
