@@ -19,7 +19,7 @@
 */
 
 #define  TASK_STK_SIZE                 512       /* Size of each task's stacks (# of WORDs)            */
-#define  N_TASKS                        10       /* Number of identical tasks                          */
+#define  N_TASKS                        4       /* Number of identical tasks                          */
 
 /*
 *********************************************************************************************************
@@ -201,6 +201,7 @@ static  void  TaskStartDisp (void)
 *********************************************************************************************************
 */
 
+
 static  void  TaskStartCreateTasks (void)
 {
     INT8U  i;
@@ -218,6 +219,7 @@ static  void  TaskStartCreateTasks (void)
 *********************************************************************************************************
 */
 
+// 여기서 색을 칠한다
 void  Task (void *pdata)
 {
     INT8U  x;
@@ -226,12 +228,54 @@ void  Task (void *pdata)
 
 
     for (;;) {
-        OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
-        x = random(80);                          /* Find X position where task number will appear      */
-        y = random(16);                          /* Find Y position where task number will appear      */
-        OSSemPost(RandomSem);                    /* Release semaphore                                  */
+        
+        if (*(char *)pdata == '0') {
+            for(x = 0; x < 80; x++) {
+                for(y = 5; y < 16; y++) {
+                    PC_DispChar(x, y + 5, ' ', DISP_BGND_RED);
+                }
+            }
+            OSTimeDlyHMSM(0, 0, 1, 0);
+        }
+       
+
+        else if (*(char *)pdata == '1') {
+            for(x = 0; x < 80; x++) {
+                for(y = 5; y < 16; y++) {
+                    PC_DispChar(x, y + 5, ' ', DISP_BGND_BLUE);
+                }
+            }
+            OSTimeDlyHMSM(0, 0, 1, 0);
+        }
+        
+
+        else if (*(char *)pdata == '2') {
+            for(x = 0; x < 80; x++) {
+                for(y = 5; y < 16; y++) {
+                    PC_DispChar(x, y + 5, ' ', DISP_BGND_BROWN);
+                }
+            }
+            OSTimeDlyHMSM(0, 0, 1, 0);
+
+        }
+
+        else if (*(char *)pdata == '3') {
+            for(x = 0; x < 80; x++) {
+                for(y = 5; y < 16; y++) {
+                    PC_DispChar(x, y + 5, ' ', DISP_BGND_GREEN);
+                }
+            }
+            OSTimeDlyHMSM(0, 0, 1, 0);
+        }
+        
+
+        // OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
+        // x = random(80);                          /* Find X position where task number will appear      */
+        // y = random(16);                          /* Find Y position where task number will appear      */
+        // OSSemPost(RandomSem);                    /* Release semaphore                                  */
                                                  /* Display the task number on the screen              */
-        PC_DispChar(x, y + 5, *(char *)pdata, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-        OSTimeDly(1);                            /* Delay 1 clock tick                                 */
+       // PC_DispChar(x, y + 5, *(char *)pdata, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+       // OSTimeDly(1);                            /* Delay 1 clock tick                                 */
     }
 }
+
