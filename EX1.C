@@ -11,6 +11,7 @@
 */
 
 #include "includes.h"
+#include <time.h>
 
 /*
 *********************************************************************************************************
@@ -19,7 +20,7 @@
 */
 
 #define  TASK_STK_SIZE                 512       /* Size of each task's stacks (# of WORDs)            */
-#define  N_TASKS                        10       /* Number of identical tasks                          */
+#define  N_TASKS                         1       /* Number of identical tasks                          */
 
 /*
 *********************************************************************************************************
@@ -29,8 +30,6 @@
 
 OS_STK        TaskStk[N_TASKS][TASK_STK_SIZE];        /* Tasks stacks                                  */
 OS_STK        TaskStartStk[TASK_STK_SIZE];
-char          TaskData[N_TASKS];                      /* Parameters to pass to each task               */
-OS_EVENT     *RandomSem;
 
 /*
 *********************************************************************************************************
@@ -38,9 +37,9 @@ OS_EVENT     *RandomSem;
 *********************************************************************************************************
 */
 
-        void  Task(void *data);                       /* Function prototypes of tasks                  */
-        void  TaskStart(void *data);                  /* Function prototypes of Startup task           */
-static  void  TaskStartCreateTasks(void);
+void  Task(void* data);                       /* Function prototypes of tasks                  */
+void  TaskStart(void* data);                  /* Function prototypes of Startup task           */
+static  void  TaskStartCreateTasks(void* data);
 static  void  TaskStartDispInit(void);
 static  void  TaskStartDisp(void);
 
@@ -51,8 +50,9 @@ static  void  TaskStartDisp(void);
 *********************************************************************************************************
 */
 
-void  main (void)
+void  main(void)
 {
+    srand(time(NULL));
     PC_DispClrScr(DISP_FGND_WHITE + DISP_BGND_BLACK);      /* Clear the screen                         */
 
     OSInit();                                              /* Initialize uC/OS-II                      */
@@ -60,9 +60,7 @@ void  main (void)
     PC_DOSSaveReturn();                                    /* Save environment to return to DOS        */
     PC_VectSet(uCOS, OSCtxSw);                             /* Install uC/OS-II's context switch vector */
 
-    RandomSem   = OSSemCreate(1);                          /* Random number semaphore                  */
-
-    OSTaskCreate(TaskStart, (void *)0, &TaskStartStk[TASK_STK_SIZE - 1], 0);
+    OSTaskCreate(TaskStart, (void*)0, &TaskStartStk[TASK_STK_SIZE - 1], 0);
     OSStart();                                             /* Start multitasking                       */
 }
 
@@ -72,14 +70,17 @@ void  main (void)
 *                                              STARTUP TASK
 *********************************************************************************************************
 */
-void  TaskStart (void *pdata)
+void  TaskStart(void* pdata)
 {
 #if OS_CRITICAL_METHOD == 3                                /* Allocate storage for CPU status register */
     OS_CPU_SR  cpu_sr;
 #endif
     char       s[100];
     INT16S     key;
+    char ch;
 
+    printf("Madatory : 1, Optional : 2\n");
+    scanf("%c", &ch);
 
     pdata = pdata;                                         /* Prevent compiler warning                 */
 
@@ -92,7 +93,8 @@ void  TaskStart (void *pdata)
 
     OSStatInit();                                          /* Initialize uC/OS-II's statistics         */
 
-    TaskStartCreateTasks();                                /* Create all the application tasks         */
+
+    TaskStartCreateTasks((void*)&ch);                                /* Create all the application tasks         */
 
     for (;;) {
         TaskStartDisp();                                  /* Update the display                       */
@@ -116,37 +118,37 @@ void  TaskStart (void *pdata)
 *********************************************************************************************************
 */
 
-static  void  TaskStartDispInit (void)
+static  void  TaskStartDispInit(void)
 {
-/*                                1111111111222222222233333333334444444444555555555566666666667777777777 */
-/*                      01234567890123456789012345678901234567890123456789012345678901234567890123456789 */
-    PC_DispStr( 0,  0, "                         uC/OS-II, The Real-Time Kernel                         ", DISP_FGND_WHITE + DISP_BGND_RED + DISP_BLINK);
-    PC_DispStr( 0,  1, "                                Jean J. Labrosse                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  2, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  3, "                                    EXAMPLE #1                                  ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  4, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  5, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  6, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  7, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  8, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0,  9, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 10, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 11, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 12, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 13, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 14, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 15, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 16, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 17, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 18, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 19, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 20, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 21, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 22, "#Tasks          :        CPU Usage:     %                                       ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 23, "#Task switch/sec:                                                               ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-    PC_DispStr( 0, 24, "                            <-PRESS 'ESC' TO QUIT->                             ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY + DISP_BLINK);
-/*                                1111111111222222222233333333334444444444555555555566666666667777777777 */
-/*                      01234567890123456789012345678901234567890123456789012345678901234567890123456789 */
+    /*                                1111111111222222222233333333334444444444555555555566666666667777777777 */
+    /*                      01234567890123456789012345678901234567890123456789012345678901234567890123456789 */
+    PC_DispStr(0, 0, "                         uC/OS-II, The Real-Time Kernel                         ", DISP_FGND_WHITE + DISP_BGND_RED + DISP_BLINK);
+    PC_DispStr(0, 1, "                                Jean J. Labrosse                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 2, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 3, "                                    EXAMPLE #1                                  ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 4, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 5, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 6, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 7, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 8, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 9, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 10, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 11, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 12, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 13, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 14, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 15, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 16, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 17, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 18, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 19, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 20, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 21, "                                                                                ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 22, "#Tasks          :        CPU Usage:     %                                       ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 23, "#Task switch/sec:                                                               ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+    PC_DispStr(0, 24, "                            <-PRESS 'ESC' TO QUIT->                             ", DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY + DISP_BLINK);
+    /*                                1111111111222222222233333333334444444444555555555566666666667777777777 */
+    /*                      01234567890123456789012345678901234567890123456789012345678901234567890123456789 */
 }
 
 /*$PAGE*/
@@ -156,7 +158,7 @@ static  void  TaskStartDispInit (void)
 *********************************************************************************************************
 */
 
-static  void  TaskStartDisp (void)
+static  void  TaskStartDisp(void)
 {
     char   s[80];
 
@@ -176,21 +178,21 @@ static  void  TaskStartDisp (void)
     PC_DispStr(75, 24, s, DISP_FGND_YELLOW + DISP_BGND_BLUE);
 
     switch (_8087) {                                               /* Display whether FPU present          */
-        case 0:
-             PC_DispStr(71, 22, " NO  FPU ", DISP_FGND_YELLOW + DISP_BGND_BLUE);
-             break;
+    case 0:
+        PC_DispStr(71, 22, " NO  FPU ", DISP_FGND_YELLOW + DISP_BGND_BLUE);
+        break;
 
-        case 1:
-             PC_DispStr(71, 22, " 8087 FPU", DISP_FGND_YELLOW + DISP_BGND_BLUE);
-             break;
+    case 1:
+        PC_DispStr(71, 22, " 8087 FPU", DISP_FGND_YELLOW + DISP_BGND_BLUE);
+        break;
 
-        case 2:
-             PC_DispStr(71, 22, "80287 FPU", DISP_FGND_YELLOW + DISP_BGND_BLUE);
-             break;
+    case 2:
+        PC_DispStr(71, 22, "80287 FPU", DISP_FGND_YELLOW + DISP_BGND_BLUE);
+        break;
 
-        case 3:
-             PC_DispStr(71, 22, "80387 FPU", DISP_FGND_YELLOW + DISP_BGND_BLUE);
-             break;
+    case 3:
+        PC_DispStr(71, 22, "80387 FPU", DISP_FGND_YELLOW + DISP_BGND_BLUE);
+        break;
     }
 }
 
@@ -201,16 +203,50 @@ static  void  TaskStartDisp (void)
 *********************************************************************************************************
 */
 
-static  void  TaskStartCreateTasks (void)
+static  void  TaskStartCreateTasks(void* data)
 {
-    INT8U  i;
-
-
-    for (i = 0; i < N_TASKS; i++) {                        /* Create N_TASKS identical tasks           */
-        TaskData[i] = '0' + i;                             /* Each task will display its own letter    */
-        OSTaskCreate(Task, (void *)&TaskData[i], &TaskStk[i][TASK_STK_SIZE - 1], i + 1);
-    }
+    OSTaskCreate(Task, data, &TaskStk[0][TASK_STK_SIZE - 1], 1);
 }
+
+// Define maximum random number and tables
+INT8U  const  myMapTbl[] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+INT8U  const  myUnMapTbl[] = {
+  0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x00 to 0x0F                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x10 to 0x1F                             */
+  5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x20 to 0x2F                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x30 to 0x3F                             */
+  6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x40 to 0x4F                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x50 to 0x5F                             */
+  5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x60 to 0x6F                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x70 to 0x7F                             */
+  7, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x80 to 0x8F                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0x90 to 0x9F                             */
+  5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0xA0 to 0xAF                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0xB0 to 0xBF                             */
+  6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0xC0 to 0xCF                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0xD0 to 0xDF                             */
+  5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,       /* 0xE0 to 0xEF                             */
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0        /* 0xF0 to 0xFF                             */
+};
+
+INT8U const maxUnMapTbl[] = {
+  0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,       /* 0x00 to 0x0F                             */
+  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,       /* 0x10 to 0x1F                             */
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,       /* 0x20 to 0x2F                             */
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,       /* 0x30 to 0x3F                             */
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,       /* 0x40 to 0x4F                             */
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,       /* 0x50 to 0x5F                             */
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,       /* 0x60 to 0x6F                             */
+  6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,       /* 0x70 to 0x7F                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,       /* 0x80 to 0x8F                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,       /* 0x90 to 0x9F                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,       /* 0xA0 to 0xAF                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,       /* 0xB0 to 0xBF                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,       /* 0xC0 to 0xCF                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,       /* 0xD0 to 0xDF                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,       /* 0xE0 to 0xEF                             */
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7        /* 0xF0 to 0xFF                             */
+};
 
 /*
 *********************************************************************************************************
@@ -218,20 +254,133 @@ static  void  TaskStartCreateTasks (void)
 *********************************************************************************************************
 */
 
-void  Task (void *pdata)
-{
-    INT8U  x;
-    INT8U  y;
-    INT8U  err;
+// return random number
+INT8U rd64(INT8U* myRdyTbl, INT8U* myRdyGrp) {
+    INT8U rand_num;
+    INT8U head;
+    INT8U tail;
+    while (1) {
+        // generate random number (0~63)
+        rand_num = random(64); // priority의 역할?
+        head = rand_num >> 3; 
+        tail = rand_num & 0x07; // 하위 3비트
 
-
-    for (;;) {
-        OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
-        x = random(80);                          /* Find X position where task number will appear      */
-        y = random(16);                          /* Find Y position where task number will appear      */
-        OSSemPost(RandomSem);                    /* Release semaphore                                  */
-                                                 /* Display the task number on the screen              */
-        PC_DispChar(x, y + 5, *(char *)pdata, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-        OSTimeDly(1);                            /* Delay 1 clock tick                                 */
+        // if the number is already exists, find other one (your code)
+        // 판단 &, 세팅 | 
+        if (myRdyTbl[head] & myMapTbl[tail]) // 이거 이해하기
+            continue;
+        else {
+            myRdyTbl[head] |= myMapTbl[tail];
+            *myRdyGrp |= myMapTbl[head];
+            return rand_num;
+        }
+            
+        
+        // insert random number into myRdyTbl & myRdyGrp (your code)
+       // shift 연산 이용해서 코드 짜기
     }
+}
+
+void clearScr() {
+    INT8U y;
+    for (y = 5; y <= 20; y++) {
+        PC_DispClrRow(y, DISP_BGND_LIGHT_GRAY);
+    }
+}
+
+void Task(void* pdata)
+{
+    // Variable declaration section
+    INT8U myRdyTbl[8];
+    INT8U myRdyGrp;
+    INT8U rand_num[4];
+    INT8U final, min, max, head;
+    INT8U i, j, x, y;
+    INT8U color = 0;
+    INT8U column = 0;
+    INT8U n, m;
+    // Command 1: mandatory, 2: optional
+    char data = *((char*)pdata);
+
+    // case 1
+    if (data == '1') {
+        y = 5;
+        // loop 4 times
+        for (j = 0; j < 4; j++) {
+            final = 63;
+            myRdyGrp = 0x00;
+            memset(myRdyTbl, 0x00, sizeof(myRdyTbl));
+        
+            while (1)
+            {
+                // initialize Rdy table & Rdy group 
+                x = column;
+                // get 4 random numbers & print
+                for (i = 0; i < 4; i++) {
+                    rand_num[i] = rd64(myRdyTbl, &myRdyGrp);
+                    PC_DispChar(x++, y, '0' + (rand_num[i] / 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+                    PC_DispChar(x++, y, '0' + (rand_num[i] % 10), DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
+                    x++;
+                }
+                // find min (your code)
+                //강노 24페이지 코드
+                n    = myUnMapTbl[myRdyGrp]; 
+                m    = myUnMapTbl[myRdyTbl[n]]; 
+                min = (n << 3) + m; 
+                
+
+                // if min is less than last one
+                if (min < final) {
+                    switch (color)
+                    {
+                    case 0: // red
+                        PC_DispChar(x++, y, '0' + (min / 10), DISP_FGND_WHITE + DISP_BGND_RED);
+                        PC_DispChar(x++, y, '0' + (min % 10), DISP_FGND_WHITE + DISP_BGND_RED);
+                        break;
+                    case 1: // blue
+                        PC_DispChar(x++, y, '0' + (min / 10), DISP_FGND_WHITE + DISP_BGND_BLUE);
+                        PC_DispChar(x++, y, '0' + (min % 10), DISP_FGND_WHITE + DISP_BGND_BLUE);
+                        break;
+                    case 2: // green
+                        PC_DispChar(x++, y, '0' + (min / 10), DISP_FGND_WHITE + DISP_BGND_GREEN);
+                        PC_DispChar(x++, y, '0' + (min % 10), DISP_FGND_WHITE + DISP_BGND_GREEN);
+                        break;
+                    case 3: // brown
+                        PC_DispChar(x++, y, '0' + (min / 10), DISP_FGND_WHITE + DISP_BGND_BROWN);
+                        PC_DispChar(x++, y, '0' + (min % 10), DISP_FGND_WHITE + DISP_BGND_BROWN);
+                        break;
+                    }
+                    color = (color + 1) % 4;
+                    final = min;
+                }
+                // next row
+                y++;
+                // if column is full -> next column
+                if (y > 20) {
+                    y = 5;
+                    column += 15;
+                }
+                // if page is full -> clear screen
+                if (column > 65) {
+                    OSTimeDly(1000);
+                    clearScr();
+                    column = 0;
+                }
+                // next loop or finish
+
+                OSTimeDlyHMSM(0, 0, 0, 500);
+
+                if (min == 0) break;
+                
+            }
+        }
+    }
+    // case 2
+    else if (data == '2') {
+        
+    }
+
+
+    // Kill the task itself. Without this, the task is run 2 times.
+    OSTaskDel(OS_PRIO_SELF);
 }
