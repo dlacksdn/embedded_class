@@ -226,7 +226,6 @@ void  Task (void *pdata)
     INT8U  y;
     INT8U  err;
 
-
     for (;;) {
         
         if (*(char *)pdata == '0') {
@@ -236,7 +235,7 @@ void  Task (void *pdata)
                 }
             }
         }
-        OSTimeDlyHMSM(0, 0, 1, 0);
+        OSTimeDlyHMSM(0, 0, 0, 500);
 
         if (*(char *)pdata == '1') {
             for(x = 0; x < 80; x++) {
@@ -245,34 +244,27 @@ void  Task (void *pdata)
                 }
             }
         }
-        OSTimeDlyHMSM(0, 0, 1, 0);
+        OSTimeDlyHMSM(0, 0, 0, 500);
 
         if (*(char *)pdata == '2') {
+            //OSTimeDlyHMSM(0, 0, 5, 0);
             for(x = 0; x < 80; x++) {
                 for(y = 5; y < 16; y++) {
                     PC_DispChar(x, y + 5, ' ', DISP_BGND_BROWN);
                 }
             }
         }
-        OSTimeDlyHMSM(0, 0, 1, 0);
+        OSTimeDlyHMSM(0, 0, 0, 500);
 
         if (*(char *)pdata == '3') {
+            OSTimeDlyHMSM(0, 0, 5, 0);
             for(x = 0; x < 80; x++) {
                 for(y = 5; y < 16; y++) {
                     PC_DispChar(x, y + 5, ' ', DISP_BGND_GREEN);
                 }
             }
         }
-        OSTimeDlyHMSM(0, 0, 1, 0);
-        
-
-        // OSSemPend(RandomSem, 0, &err);           /* Acquire semaphore to perform random numbers        */
-        // x = random(80);                          /* Find X position where task number will appear      */
-        // y = random(16);                          /* Find Y position where task number will appear      */
-        // OSSemPost(RandomSem);                    /* Release semaphore                                  */
-                                                 /* Display the task number on the screen              */
-       // PC_DispChar(x, y + 5, *(char *)pdata, DISP_FGND_BLACK + DISP_BGND_LIGHT_GRAY);
-       // OSTimeDly(1);                            /* Delay 1 clock tick                                 */
+        // OSTimeDlyHMSM(0, 0, 0, 500);
     }
 }
 
